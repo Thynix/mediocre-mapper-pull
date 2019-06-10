@@ -1,0 +1,10 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/nike4613/ModSaber-MetadataFileSchema/master/Schema.json",
+  "author": "Alppuccino",
+  "description": "Adds a song refresh button in-game, meaning you don't have to take the HMD off to refresh your library.",
+  "gameVersion": "0.13.2",
+  "id": null,
+  "name": "Song Refresh Button",
+  "version": "1.0.4",
+  "features": []
+}
