@@ -61,7 +61,7 @@ namespace Song_Refresh_Button_BSIPA
                 CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Level Packs", "Refreshes level packs", delegate { SongCore.Loader.Instance.RefreshLevelPacks(); });
             }
         }
-
+        
         public void OnSceneUnloaded(Scene scene)
         {
 
