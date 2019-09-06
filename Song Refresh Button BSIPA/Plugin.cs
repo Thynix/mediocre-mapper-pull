@@ -55,9 +55,6 @@ namespace Song_Refresh_Button_BSIPA
             if (scene.name == "MenuCore")
             {
                 CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Songs", "Refreshes song library", delegate { SongCore.Loader.Instance.RefreshSongs(); });
-            }
-            if (scene.name == "MenuCore")
-            {
                 CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Level Packs", "Refreshes level packs", delegate { SongCore.Loader.Instance.RefreshLevelPacks(); });
             }
         }
