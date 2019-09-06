@@ -63,7 +63,7 @@ namespace Song_Refresh_Button_BSIPA
             {
                 CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Songs", "Refreshes song library", delegate { SongCore.Loader.Instance.RefreshSongs(); });
                 CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Level Packs", "Refreshes level packs", delegate { SongCore.Loader.Instance.RefreshLevelPacks(); });
-                CustomUI.MenuButton.MenuButtonUI.AddButton("MediocreMapper Pull", "Pulls from Mediocre Mapper server (does not convert or refresh)", delegate { PullSong(); });
+                CustomUI.MenuButton.MenuButtonUI.AddButton("MediocreMapper Pull", "Pulls from Mediocre Mapper server (does not convert or refresh)", PullSong);
             }
         }
         
@@ -76,6 +76,8 @@ namespace Song_Refresh_Button_BSIPA
             // TODO: How to display progress? text requires a transform.
             // TODO: Thread out for conversion and notify on completion - I'm seeing stuff with coroutines as well.
             var outputDir = @"E:\Beat Saber Mapping\Working Repos\CustomSongs";
+            Logger.log.Debug("Opening TCP connection");
+            // TODO: Connection error notification
             var client = new TcpClient("localhost", 17425);
             var stream = client.GetStream();
             
@@ -102,25 +104,20 @@ namespace Song_Refresh_Button_BSIPA
             while (message.ToString().Split(new[] {";;;"}, StringSplitOptions.None).Length < 5)
             {
                 var bytesRead = stream.Read(buffer, 0, buffer.Length);
-                var stringChunk = Encoding.UTF8.GetChars(new ArraySegment<byte>(buffer, 0, bytesRead).ToArray());
-                //Logger.log.Debug($"received {bytesRead} bytes");
-                //Logger.log.Debug(new string(stringChunk));
-                message.Append(stringChunk);
+                message.Append(Encoding.UTF8.GetChars(new ArraySegment<byte>(buffer, 0, bytesRead).ToArray()));
             }
             client.Close();
 
             var components = message.ToString().Split(new[] {";;;"}, StringSplitOptions.None);
             
-            Logger.log.Debug($"Read welcome message in {Time.time - welcomeStart} seconds; got {components.Length} message components");
-            Assert.IsTrue(components.Length >= 4, "Not enough message components");
+            Logger.log.Debug($"Read welcome message in {Time.time - welcomeStart:f2} seconds");
 
             var folderName = components[0].Split(new[] {"::"}, StringSplitOptions.None)[0];
             var difficultyFilename = components[2];
             var difficultyContent = components[3];
             Logger.log.Debug($"Folder: {folderName}\nDifficulty: {difficultyFilename}\nDifficulty size: {difficultyContent.Length} characters");
-            Logger.log.Debug($"{difficultyContent}");
 
-            var outputPath = $"{outputDir}\\{folderName}\\{difficultyFilename}-test";
+            var outputPath = $"{outputDir}\\{folderName}\\{difficultyFilename}";
             Logger.log.Debug($"Writing to {outputPath}");
             using (var outputDifficulty = File.CreateText(outputPath))
             {
