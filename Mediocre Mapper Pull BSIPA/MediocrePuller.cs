@@ -22,6 +22,8 @@ namespace Mediocre_Mapper_Pull_BSIPA
         private bool _conversionDone;
 
         private string[] _components;
+        private StatusText _statusText;
+        private string _errorMessage;
 
         public static void OnLoad()
         {
@@ -36,6 +38,7 @@ namespace Mediocre_Mapper_Pull_BSIPA
         private void Awake()
         {
             Instance = this;
+            _statusText = StatusText.Create();
             _runningPull = false;
             DontDestroyOnLoad(gameObject);
         }
@@ -57,6 +60,7 @@ namespace Mediocre_Mapper_Pull_BSIPA
             {
                 _components = null;
                 _welcomeDone = false;
+                _statusText.ShowMessage($"Connecting to {host}:{port}...");
                 new Thread(delegate(object o)
                 {
                     try
@@ -73,6 +77,7 @@ namespace Mediocre_Mapper_Pull_BSIPA
                 yield return new WaitUntil(() => _welcomeDone);
                 if (_components == null)
                 {
+                    _statusText.ShowMessage(_errorMessage);
                     yield break;
                 }
 
@@ -80,6 +85,7 @@ namespace Mediocre_Mapper_Pull_BSIPA
                 var difficultyFilename = _components[2];
                 var difficultyContent = _components[3];
                 Logger.log.Debug($"Folder: {folderName}\nDifficulty: {difficultyFilename}\nDifficulty size: {difficultyContent.Length} characters");
+                _statusText.ShowMessage($"Got song {folderName}");
 
                 var customSongsPath = $"{BeatSaber.InstallPath}\\Beat Saber_Data\\CustomWIPLevels";
                 var songPath = $"{customSongsPath}\\{folderName}";
@@ -115,11 +121,14 @@ namespace Mediocre_Mapper_Pull_BSIPA
                     yield return new WaitUntil(() => _conversionDone);
 
                     Logger.log.Debug($"Conversion complete in {stopwatch.Elapsed}; refreshing songs.");
+                    _statusText.ShowMessage($"Conversion complete; refreshing {folderName}", 3);
                     SongCore.Loader.Instance.RefreshSongs();
                 }
                 else
                 {
-                    Logger.log.Info($"{converterPath} does not exist; can't convert.'");
+                    _errorMessage = $"{converterPath} does not exist; can't convert";
+                    _statusText.ShowMessage(_errorMessage);
+                    Logger.log.Info(_errorMessage);
                 }
             }
             finally
@@ -174,12 +183,14 @@ namespace Mediocre_Mapper_Pull_BSIPA
             }
             catch (SocketException e)
             {
-                Logger.log.Error($"Failed to connect to {host}:{port}: {e.Message}");
+                _errorMessage = $"Failed to connect to {host}:{port}: {e.Message}";
+                Logger.log.Error(_errorMessage);
                 throw;
             }
             catch (IOException e)
             {
-                Logger.log.Error($"Networking error: {e.Message}");
+                _errorMessage = $"Networking error: {e.Message}";
+                Logger.log.Error(_errorMessage);
                 throw;
             }
 
