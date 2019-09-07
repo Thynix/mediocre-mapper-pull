@@ -28,3 +28,16 @@ port = 17425
 7. Wait a few seconds for the plugin to join the server, convert the map, and refresh the songs. If there are any changes a song loading progress bar and messages will appear above the main pane, like it does when the game starts. If it works, congratulations and have fun!
 
 If it doesn't work, check the logs under `Logs\Song Refresh Button` and `Logs\Unity Engine` in the Beat Saber installation directory for clues.
+
+## Contributing to song-refresh-button
+
+The project checks for the default Beat Saber installation folders for Oculus and Steam, and sets references relative to whichever exists. If your Beat Saber is installed elsewhere, create `Song Refresh Button BSIPA.csproj.user` in the project directory and modify it to reflect your setup:
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <BeatSaberPath>C:\Path\to\Beat Saber</BeatSaberPath>
+  </PropertyGroup>
+</Project>
+```
