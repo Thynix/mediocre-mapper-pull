@@ -1,6 +1,6 @@
 # Mediocre Mapper Pull
 
-This Beat Saber plugin adds a button in-game to pull WIP map from a [Mediocre Mapper Multi-Mapper server](https://github.com/squeaksies/MediocreMapper/blob/master/ServerReadme.md#mediocre-mapper-multi-mapper-server-setup).
+This Beat Saber plugin adds a button in-game to pull a WIP map from a [Mediocre Mapper Multi-Mapper server](https://github.com/squeaksies/MediocreMapper/blob/master/ServerReadme.md#mediocre-mapper-multi-mapper-server-setup).
 
 Choose whether to have the button on the main pane using the _MODS_ menu.
 
