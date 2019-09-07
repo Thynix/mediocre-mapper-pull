@@ -13,9 +13,9 @@ using UnityEngine.SceneManagement;
 
 namespace Song_Refresh_Button_BSIPA
 {
-    public class MedicorePuller : MonoBehaviour
+    public class MediocrePuller : MonoBehaviour
     {
-        public static MedicorePuller Instance;
+        public static MediocrePuller Instance;
 
         private bool _runningPull;
         private bool _welcomeDone;
@@ -30,7 +30,7 @@ namespace Song_Refresh_Button_BSIPA
                 return;
             }
 
-            new GameObject("Mediocre Mapper puller").AddComponent<MedicorePuller>();
+            new GameObject("Mediocre Mapper puller").AddComponent<MediocrePuller>();
         }
 
         private void Awake()
@@ -108,7 +108,7 @@ namespace Song_Refresh_Button_BSIPA
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
                     process.Start();
-                    Logger.log.Debug($"Started conversion.");
+                    Logger.log.Debug("Started conversion.");
 
                     yield return new WaitUntil(() => _conversionDone);
 

@@ -258,7 +258,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MedicorePuller.cs" />
+    <Compile Include="MediocrePuller.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="PluginConfig.cs" />
