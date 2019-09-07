@@ -1,6 +1,5 @@
-﻿using IPA;
-using IPA.Config;
-using IPA.Utilities;
+﻿using BS_Utils.Utilities;
+using IPA;
 using UnityEngine.SceneManagement;
 using IPALogger = IPA.Logging.Logger;
     
@@ -9,20 +8,13 @@ namespace Song_Refresh_Button_BSIPA
 {
     public class Plugin : IBeatSaberPlugin
     {
-        internal static Ref<PluginConfig> config;
-        internal static IConfigProvider configProvider;
+        private Config _config;
 
-        public void Init(IPALogger logger, [Config.Prefer("json")] IConfigProvider cfgProvider)
+        public void Init(IPALogger logger)
         {
             Logger.log = logger;
-            configProvider = cfgProvider;
 
-            config = cfgProvider.MakeLink<PluginConfig>((p, v) =>
-            {
-                if (v.Value == null || v.Value.RegenerateConfig)
-                    p.Store(v.Value = new PluginConfig() { RegenerateConfig = false });
-                config = v;
-            });
+            _config = new Config("song-refresh-button");
         }
 
         public void OnApplicationStart()
@@ -57,7 +49,13 @@ namespace Song_Refresh_Button_BSIPA
                 MediocrePuller.OnLoad();
                 CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Songs", "Refreshes song library", delegate { SongCore.Loader.Instance.RefreshSongs(); });
                 CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Level Packs", "Refreshes level packs", delegate { SongCore.Loader.Instance.RefreshLevelPacks(); });
-                CustomUI.MenuButton.MenuButtonUI.AddButton("MediocreMapper Pull", "Pulls from Mediocre Mapper server", delegate { MediocrePuller.Instance.Pull("127.0.0.1", 17425); });
+                CustomUI.MenuButton.MenuButtonUI.AddButton("MediocreMapper Pull", "Pulls from Mediocre Mapper server",
+                    delegate
+                    {
+                        MediocrePuller.Instance.Pull(
+                            _config.GetString("MMMM", "hostname", "127.0.0.1", true),
+                            _config.GetInt("MMMM", "port", 17425, true));
+                    });
             }
         }
 
