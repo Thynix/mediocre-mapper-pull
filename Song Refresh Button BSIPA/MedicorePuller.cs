@@ -101,7 +101,6 @@ namespace Song_Refresh_Button_BSIPA
                 else
                 {
                     Logger.log.Info($"{converterPath} does not exit; can't convert.'");
-                    // TODO: Is there a way to exit a coroutine? Will this branch hang?
                 }
             }
             finally
@@ -119,37 +118,39 @@ namespace Song_Refresh_Button_BSIPA
         private string[] ReadWelcomeMessage()
         {
             var stopwatch = new Stopwatch();
+            var message = new StringBuilder();
+            var buffer = new byte[4096];
 
             // TODO: How to display progress? text requires a transform.
             Logger.log.Debug("Opening TCP connection");
             stopwatch.Start();
             // TODO: Connection error notification
-            var client = new TcpClient("localhost", 17425);
-            var stream = client.GetStream();
-            Logger.log.Debug($"TCP connected in {stopwatch.Elapsed}");
-
-            var username = Encoding.UTF8.GetBytes("BeatSaber refresh");
-            stream.Write(username, 0, username.Length);
-            Logger.log.Debug("Sent username");
-
-            // Receive until difficulty contents field (index 3) is received, separated by ";;;":
-            //  0: folder name::difficulty index
-            //  1: contents of info.json
-            //  2: path to relevant difficulty.json
-            //  3: contents of difficulty.json
-            //  4: audio filename
-            //  5: audio filesize
-            //  6: audio download url
-            var message = new StringBuilder();
-            var buffer = new byte[4096];
-            Logger.log.Debug("Reading welcome message");
-            stopwatch.Restart();
-            while (Regex.Matches(message.ToString(), ";;;").Count < 4)
+            using (var client = new TcpClient("localhost", 17425))
+            using (var stream = client.GetStream())
             {
-                var bytesRead = stream.Read(buffer, 0, buffer.Length);
-                message.Append(Encoding.UTF8.GetChars(new ArraySegment<byte>(buffer, 0, bytesRead).ToArray()));
+                Logger.log.Debug($"TCP connected in {stopwatch.Elapsed}");
+
+                var username = Encoding.UTF8.GetBytes("BeatSaber refresh");
+                stream.Write(username, 0, username.Length);
+                Logger.log.Debug("Sent username");
+
+                // Receive until difficulty contents field (index 3) is received, separated by ";;;":
+                //  0: folder name::difficulty index
+                //  1: contents of info.json
+                //  2: path to relevant difficulty.json
+                //  3: contents of difficulty.json
+                //  4: audio filename
+                //  5: audio filesize
+                //  6: audio download url
+                Logger.log.Debug("Reading welcome message");
+                stopwatch.Restart();
+                while (Regex.Matches(message.ToString(), ";;;").Count < 4)
+                {
+                    var bytesRead = stream.Read(buffer, 0, buffer.Length);
+                    message.Append(Encoding.UTF8.GetChars(new ArraySegment<byte>(buffer, 0, bytesRead).ToArray()));
+                }
             }
-            client.Close();
+
             Logger.log.Debug($"Read welcome message in {stopwatch.Elapsed} seconds");
 
             return message.ToString().Split(new[] {";;;"}, StringSplitOptions.None);
