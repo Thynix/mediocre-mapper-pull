@@ -115,7 +115,7 @@ namespace Song_Refresh_Button_BSIPA
                 process.EnableRaisingEvents = true;
                 process.Exited += Process_Exited;
                 process.Start();
-                Logger.log.Debug($"Started conversion.'");
+                Logger.log.Debug($"Started conversion.");
 
                 yield return new WaitUntil(() => _conversionDone);
 
