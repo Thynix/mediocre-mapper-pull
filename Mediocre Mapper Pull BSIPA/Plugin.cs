@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 using IPALogger = IPA.Logging.Logger;
     
 
-namespace Song_Refresh_Button_BSIPA
+namespace Mediocre_Mapper_Pull_BSIPA
 {
     public class Plugin : IBeatSaberPlugin
     {
@@ -14,7 +14,7 @@ namespace Song_Refresh_Button_BSIPA
         {
             Logger.log = logger;
 
-            _config = new Config("song-refresh-button");
+            _config = new Config("mediocre-mapper-pull");
         }
 
         public void OnApplicationStart()
@@ -47,8 +47,6 @@ namespace Song_Refresh_Button_BSIPA
             if (scene.name == "MenuCore")
             {
                 MediocrePuller.OnLoad();
-                CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Songs", "Refreshes song library", delegate { SongCore.Loader.Instance.RefreshSongs(); });
-                CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Level Packs", "Refreshes level packs", delegate { SongCore.Loader.Instance.RefreshLevelPacks(); });
                 CustomUI.MenuButton.MenuButtonUI.AddButton("MediocreMapper Pull", "Pulls from Mediocre Mapper server",
                     delegate
                     {

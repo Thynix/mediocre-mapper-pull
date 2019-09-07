@@ -11,7 +11,7 @@ using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Song_Refresh_Button_BSIPA
+namespace Mediocre_Mapper_Pull_BSIPA
 {
     public class MediocrePuller : MonoBehaviour
     {

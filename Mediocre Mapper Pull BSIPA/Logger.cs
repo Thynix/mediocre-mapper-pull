@@ -1,6 +1,6 @@
 ﻿using IPALogger = IPA.Logging.Logger;
 
-namespace Song_Refresh_Button_BSIPA
+namespace Mediocre_Mapper_Pull_BSIPA
 {
     internal static class Logger
     {

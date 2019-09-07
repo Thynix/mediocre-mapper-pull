@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1A255B2E-2284-4509-A5A2-3C6C8469E9D3}</ProjectGuid>
+    <ProjectGuid>{551370E2-4701-4758-959D-E23091F83CC0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Song_Refresh_Button_BSIPA</RootNamespace>
-    <AssemblyName>song-refresh-button</AssemblyName>
+    <RootNamespace>Mediocre_Mapper_Pull_BSIPA</RootNamespace>
+    <AssemblyName>mediocre-mapper-pull</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PathMap>$(SolutionDir)=C:\</PathMap>
