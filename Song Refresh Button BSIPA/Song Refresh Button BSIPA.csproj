@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" InitialTargets="ValidatePath" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -43,6 +43,11 @@
       </PropertyGroup>
     </When>
   </Choose>
+  <Target Name="ValidatePath">
+    <Error Condition="'$(BeatSaberPath)' == ''" Text="BeatSaberPath is empty. Default installation locations were checked - are you using a custom installation location?"/>
+    <Error Condition="!EXISTS('$(BeatSaberPath)')" Text="Specified BeatSaberPath '$(BeatSaberPath)' does not exist."/>
+	<Message Text="BeatSaberPath is '$(BeatSaberPath)'"/>
+  </Target>
   <PropertyGroup>
     <PATH>$(PATH);$(BeatSaberPath)\Plugins;$(BeatSaberPath)\Beat Saber_Data\Managed'</PATH>
   </PropertyGroup>
