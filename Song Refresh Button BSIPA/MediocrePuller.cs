@@ -92,15 +92,17 @@ namespace Song_Refresh_Button_BSIPA
                 }
                 Logger.log.Debug("Wrote file");
 
-                var converterPath = BeatSaber.InstallPath + "\\songe-converter.exe";
+                var converterPath = $"{BeatSaber.InstallPath}\\songe-converter.exe";
                 if (File.Exists(converterPath))
                 {
                     var process = new Process();
-                    var startInfo = new ProcessStartInfo();
-                    startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                    startInfo.FileName = converterPath;
-                    startInfo.Arguments = $"-k -a \"{customSongsPath}\"";
-                    startInfo.UseShellExecute = false;
+                    var startInfo = new ProcessStartInfo
+                    {
+                        WindowStyle = ProcessWindowStyle.Normal,
+                        FileName = converterPath,
+                        Arguments = $"-k -a \"{customSongsPath}\"",
+                        UseShellExecute = false,
+                    };
                     process.StartInfo = startInfo;
                     process.EnableRaisingEvents = true;
                     process.Exited += Process_Exited;
@@ -159,7 +161,7 @@ namespace Song_Refresh_Button_BSIPA
                     //  2: path to relevant difficulty.json
                     //  3: contents of difficulty.json
                     //  4: audio filename
-                    //  5: audio filesize
+                    //  5: audio file size
                     //  6: audio download url
                     Logger.log.Debug("Reading welcome message");
                     stopwatch.Restart();
