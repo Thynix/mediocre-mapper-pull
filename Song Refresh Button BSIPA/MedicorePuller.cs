@@ -93,10 +93,11 @@ namespace Song_Refresh_Button_BSIPA
             var difficultyContent = components[3];
             Logger.log.Debug($"Folder: {folderName}\nDifficulty: {difficultyFilename}\nDifficulty size: {difficultyContent.Length} characters");
 
-            var folderPath = $"{BeatSaber.InstallPath}\\Beat Saber_Data\\CustomWIPLevels\\{folderName}";
-            var outputPath = $"{folderPath}\\{difficultyFilename}";
-            Logger.log.Debug($"Writing to {outputPath}");
-            using (var outputDifficulty = File.CreateText(outputPath))
+            var customSongsPath = $"{BeatSaber.InstallPath}\\Beat Saber_Data\\CustomWIPLevels";
+            var songPath = $"{customSongsPath}\\{folderName}";
+            var difficultyPath = $"{songPath}\\{difficultyFilename}";
+            Logger.log.Debug($"Writing to {difficultyPath}");
+            using (var outputDifficulty = File.CreateText(difficultyPath))
             {
                 outputDifficulty.Write(difficultyContent);
             }
@@ -108,17 +109,20 @@ namespace Song_Refresh_Button_BSIPA
                 Process process = new Process();
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                // TODO: filename as songe-converter instead of going through cmd?
-                startInfo.FileName = "cmd.exe";
-                startInfo.Arguments = $"/C songe-converter.exe -k -a \"{folderPath}\"";
+                startInfo.FileName = converterPath;
+                startInfo.Arguments = $"-k -a \"{customSongsPath}\"";
+                startInfo.UseShellExecute = false;
                 process.StartInfo = startInfo;
                 process.EnableRaisingEvents = true;
                 process.Exited += Process_Exited;
+
+                stopwatch.Restart();
                 process.Start();
                 Logger.log.Debug($"Started conversion.");
 
                 yield return new WaitUntil(() => _conversionDone);
 
+                Logger.log.Debug($"Conversion complete in {stopwatch.Elapsed}; refreshing songs.");
                 SongCore.Loader.Instance.RefreshSongs();
             }
             else
