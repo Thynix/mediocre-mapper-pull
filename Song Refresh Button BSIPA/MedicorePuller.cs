@@ -77,7 +77,7 @@ namespace Song_Refresh_Button_BSIPA
             var buffer = new byte[4096];
             Logger.log.Debug("Reading welcome message");
             stopwatch.Restart();
-            while (message.ToString().Split(new[] {";;;"}, StringSplitOptions.None).Length < 5)
+            while (Regex.Matches(message.ToString(), ";;;").Count < 4)
             {
                 var bytesRead = stream.Read(buffer, 0, buffer.Length);
                 message.Append(Encoding.UTF8.GetChars(new ArraySegment<byte>(buffer, 0, bytesRead).ToArray()));
