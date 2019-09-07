@@ -57,7 +57,7 @@ namespace Song_Refresh_Button_BSIPA
                 MedicorePuller.OnLoad();
                 CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Songs", "Refreshes song library", delegate { SongCore.Loader.Instance.RefreshSongs(); });
                 CustomUI.MenuButton.MenuButtonUI.AddButton("Refresh Level Packs", "Refreshes level packs", delegate { SongCore.Loader.Instance.RefreshLevelPacks(); });
-                CustomUI.MenuButton.MenuButtonUI.AddButton("MediocreMapper Pull", "Pulls from Mediocre Mapper server", delegate { MedicorePuller.Instance.Pull(); });
+                CustomUI.MenuButton.MenuButtonUI.AddButton("MediocreMapper Pull", "Pulls from Mediocre Mapper server", delegate { MedicorePuller.Instance.Pull("127.0.0.1", 17425); });
             }
         }
 

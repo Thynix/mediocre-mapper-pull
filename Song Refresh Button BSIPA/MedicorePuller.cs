@@ -17,10 +17,11 @@ namespace Song_Refresh_Button_BSIPA
     {
         public static MedicorePuller Instance;
 
-        private static bool _runningPull;
-        private static bool _conversionDone;
+        private bool _runningPull;
+        private bool _welcomeDone;
+        private bool _conversionDone;
 
-        private static string[] _components;
+        private string[] _components;
 
         public static void OnLoad()
         {
@@ -39,8 +40,7 @@ namespace Song_Refresh_Button_BSIPA
             DontDestroyOnLoad(gameObject);
         }
 
-        // TODO: Take MediocreMapper host and port as arguments, pulled from plugin config
-        public void Pull()
+        public void Pull(string host, int port)
         {
             if (SceneManager.GetActiveScene().name != "MenuCore" || _runningPull)
             {
@@ -48,17 +48,33 @@ namespace Song_Refresh_Button_BSIPA
             }
 
             _runningPull = true;
-            StartCoroutine(PullSong());
+            StartCoroutine(PullSong(host, port));
         }
 
-        private IEnumerator PullSong()
+        private IEnumerator PullSong(string host, int port)
         {
             try
             {
                 _components = null;
-                new Thread(delegate(object o) { _components = ReadWelcomeMessage(); }).Start();
+                _welcomeDone = false;
+                new Thread(delegate(object o)
+                {
+                    try
+                    {
+                        _components = ReadWelcomeMessage(host, port);
+                    }
+                    finally
+                    {
+                        _welcomeDone = true;
+                    }
+                }).Start();
 
-                yield return new WaitUntil(() => _components != null);
+                // If _components is not set, there was a problem.
+                yield return new WaitUntil(() => _welcomeDone);
+                if (_components == null)
+                {
+                    yield break;
+                }
 
                 var folderName = _components[0].Split(new[] {"::"}, StringSplitOptions.None)[0];
                 var difficultyFilename = _components[2];
@@ -68,6 +84,7 @@ namespace Song_Refresh_Button_BSIPA
                 var customSongsPath = $"{BeatSaber.InstallPath}\\Beat Saber_Data\\CustomWIPLevels";
                 var songPath = $"{customSongsPath}\\{folderName}";
                 var difficultyPath = $"{songPath}\\{difficultyFilename}";
+
                 Logger.log.Debug($"Writing to {difficultyPath}");
                 using (var outputDifficulty = File.CreateText(difficultyPath))
                 {
@@ -78,8 +95,8 @@ namespace Song_Refresh_Button_BSIPA
                 var converterPath = BeatSaber.InstallPath + "\\songe-converter.exe";
                 if (File.Exists(converterPath))
                 {
-                    Process process = new Process();
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    var process = new Process();
+                    var startInfo = new ProcessStartInfo();
                     startInfo.WindowStyle = ProcessWindowStyle.Normal;
                     startInfo.FileName = converterPath;
                     startInfo.Arguments = $"-k -a \"{customSongsPath}\"";
@@ -115,40 +132,53 @@ namespace Song_Refresh_Button_BSIPA
             _conversionDone = true;
         }
 
-        private string[] ReadWelcomeMessage()
+        private string[] ReadWelcomeMessage(string host, int port)
         {
             var stopwatch = new Stopwatch();
             var message = new StringBuilder();
             var buffer = new byte[4096];
 
             // TODO: How to display progress? text requires a transform.
-            Logger.log.Debug("Opening TCP connection");
+            Logger.log.Debug($"Connecting with TCP to {host}:{port}");
             stopwatch.Start();
-            // TODO: Connection error notification
-            using (var client = new TcpClient("localhost", 17425))
-            using (var stream = client.GetStream())
+
+            try
             {
-                Logger.log.Debug($"TCP connected in {stopwatch.Elapsed}");
-
-                var username = Encoding.UTF8.GetBytes("BeatSaber refresh");
-                stream.Write(username, 0, username.Length);
-                Logger.log.Debug("Sent username");
-
-                // Receive until difficulty contents field (index 3) is received, separated by ";;;":
-                //  0: folder name::difficulty index
-                //  1: contents of info.json
-                //  2: path to relevant difficulty.json
-                //  3: contents of difficulty.json
-                //  4: audio filename
-                //  5: audio filesize
-                //  6: audio download url
-                Logger.log.Debug("Reading welcome message");
-                stopwatch.Restart();
-                while (Regex.Matches(message.ToString(), ";;;").Count < 4)
+                using (var client = new TcpClient(host, port))
+                using (var stream = client.GetStream())
                 {
-                    var bytesRead = stream.Read(buffer, 0, buffer.Length);
-                    message.Append(Encoding.UTF8.GetChars(new ArraySegment<byte>(buffer, 0, bytesRead).ToArray()));
+                    Logger.log.Debug($"TCP connected in {stopwatch.Elapsed}");
+
+                    var username = Encoding.UTF8.GetBytes("BeatSaber refresh");
+                    stream.Write(username, 0, username.Length);
+                    Logger.log.Debug("Sent username");
+
+                    // Receive until difficulty contents field (index 3) is received, separated by ";;;":
+                    //  0: folder name::difficulty index
+                    //  1: contents of info.json
+                    //  2: path to relevant difficulty.json
+                    //  3: contents of difficulty.json
+                    //  4: audio filename
+                    //  5: audio filesize
+                    //  6: audio download url
+                    Logger.log.Debug("Reading welcome message");
+                    stopwatch.Restart();
+                    while (Regex.Matches(message.ToString(), ";;;").Count < 4)
+                    {
+                        var bytesRead = stream.Read(buffer, 0, buffer.Length);
+                        message.Append(Encoding.UTF8.GetChars(new ArraySegment<byte>(buffer, 0, bytesRead).ToArray()));
+                    }
                 }
+            }
+            catch (SocketException e)
+            {
+                Logger.log.Error($"Failed to connect to {host}:{port}: {e.Message}");
+                throw;
+            }
+            catch (IOException e)
+            {
+                Logger.log.Error($"Networking error: {e.Message}");
+                throw;
             }
 
             Logger.log.Debug($"Read welcome message in {stopwatch.Elapsed} seconds");
