@@ -21,8 +21,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
         private static readonly Vector2 HeaderSize = new Vector2(100, 20);
         private const float HeaderFontSize = 15f;
 
-        private bool _showingMessage;
-
         public static StatusText Create()
         {
             return new GameObject("Status Text").AddComponent<StatusText>();
@@ -31,7 +29,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
         public void ShowMessage(string message, float time)
         {
             StopAllCoroutines();
-            _showingMessage = true;
             _statusText.text = message;
             _canvas.enabled = true;
             StartCoroutine(DisableCanvasRoutine(time));
@@ -40,7 +37,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
         public void ShowMessage(string message)
         {
             StopAllCoroutines();
-            _showingMessage = true;
             _statusText.text = message;
             _canvas.enabled = true;
         }
@@ -57,11 +53,8 @@ namespace Mediocre_Mapper_Pull_BSIPA
 
         private void SceneManagerOnActiveSceneChanged(Scene oldScene, Scene newScene)
         {
-            if (newScene.name == "MenuCore" && _showingMessage)
-            {
-                _canvas.enabled = true;
-            }
-            else
+            // Clear the message, if any, when changing away. It's not useful to persist.
+            if (newScene.name != "MenuCore")
             {
                 _canvas.enabled = false;
             }
@@ -71,7 +64,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
         {
             yield return new WaitForSecondsRealtime(time);
             _canvas.enabled = false;
-            _showingMessage = false;
         }
 
         private void Awake()
