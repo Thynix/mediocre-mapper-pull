@@ -48,29 +48,26 @@
     <Error Condition="!EXISTS('$(BeatSaberPath)')" Text="Specified BeatSaberPath '$(BeatSaberPath)' does not exist."/>
 	<Message Text="BeatSaberPath is '$(BeatSaberPath)'"/>
   </Target>
-  <PropertyGroup>
-    <PATH>$(PATH);$(BeatSaberPath)\Plugins;$(BeatSaberPath)\Beat Saber_Data\Managed'</PATH>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BeatSaberCustomUI">
-      <HintPath>BeatSaberCustomUI.dll</HintPath>
+      <HintPath>$(BeatSaberPath)\Plugins\BeatSaberCustomUI.dll</HintPath>
     </Reference>
     <Reference Include="BS_Utils, Version=1.3.6.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>BS_Utils.dll</HintPath>
+      <HintPath>$(BeatSaberPath)\Plugins\BS_Utils.dll</HintPath>
     </Reference>
     <Reference Include="IPA.Loader">
-      <HintPath>IPA.Loader.dll</HintPath>
+      <HintPath>$(BeatSaberPath)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
     </Reference>
     <Reference Include="SongCore">
-      <HintPath>SongCore.dll</HintPath>
+      <HintPath>$(BeatSaberPath)\Plugins\SongCore.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="UnityEngine">
-      <HintPath>UnityEngine.dll</HintPath>
+      <HintPath>$(BeatSaberPath)\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(BeatSaberPath)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
