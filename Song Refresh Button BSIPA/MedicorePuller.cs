@@ -100,7 +100,7 @@ namespace Song_Refresh_Button_BSIPA
                 }
                 else
                 {
-                    Logger.log.Info($"{converterPath} does not exit; can't convert.'");
+                    Logger.log.Info($"{converterPath} does not exist; can't convert.'");
                 }
             }
             finally
