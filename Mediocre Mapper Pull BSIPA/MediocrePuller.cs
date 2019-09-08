@@ -23,7 +23,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
 
         private string[] _components;
         private StatusText _statusText;
-        private string _errorMessage;
 
         public static void OnLoad()
         {
@@ -67,6 +66,11 @@ namespace Mediocre_Mapper_Pull_BSIPA
                     {
                         _components = ReadWelcomeMessage(host, port);
                     }
+                    catch (Exception e)
+                    {
+                        _statusText.ShowMessage(e.Message);
+                        Logger.log.Error(e.Message);
+                    }
                     finally
                     {
                         _welcomeDone = true;
@@ -77,7 +81,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
                 yield return new WaitUntil(() => _welcomeDone);
                 if (_components == null)
                 {
-                    _statusText.ShowMessage(_errorMessage);
                     yield break;
                 }
 
@@ -129,9 +132,9 @@ namespace Mediocre_Mapper_Pull_BSIPA
                 }
                 else
                 {
-                    _errorMessage = $"{converterPath} does not exist; can't convert";
-                    _statusText.ShowMessage(_errorMessage);
-                    Logger.log.Info(_errorMessage);
+                    var errorMessage = $"{converterPath} does not exist; can't convert";
+                    _statusText.ShowMessage(errorMessage);
+                    Logger.log.Info(errorMessage);
                 }
             }
             finally
@@ -184,15 +187,11 @@ namespace Mediocre_Mapper_Pull_BSIPA
             }
             catch (SocketException e)
             {
-                _errorMessage = $"Failed to connect to {host}:{port}: {e.Message}";
-                Logger.log.Error(_errorMessage);
-                throw;
+                throw new Exception($"Failed to connect to {host}:{port}: {e.Message}", e);
             }
             catch (IOException e)
             {
-                _errorMessage = $"Networking error: {e.Message}";
-                Logger.log.Error(_errorMessage);
-                throw;
+                throw new Exception($"Networking error: {e.Message}", e);
             }
 
             Logger.log.Debug($"Read welcome message in {stopwatch.Elapsed} seconds");
