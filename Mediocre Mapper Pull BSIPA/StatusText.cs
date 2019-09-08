@@ -11,7 +11,7 @@ namespace Mediocre_Mapper_Pull_BSIPA
         private Canvas _canvas;
         private TMP_Text _statusText;
 
-        private static readonly Vector3 Position = new Vector3(0, 0.5f, 2.5f);
+        private static readonly Vector3 Position = new Vector3(0, 0.3f, 2.5f);
         private static readonly Vector3 Rotation = new Vector3(0, 0, 0);
         private static readonly Vector3 Scale = new Vector3(0.01f, 0.01f, 0.01f);
 

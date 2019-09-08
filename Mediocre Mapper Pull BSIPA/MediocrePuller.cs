@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -101,16 +102,13 @@ namespace Mediocre_Mapper_Pull_BSIPA
                 }
                 Logger.log.Debug("Wrote file");
 
-                var converterPath = $"{BeatSaber.InstallPath}\\songe-converter.exe";
-                if (File.Exists(converterPath))
-                {
                     // Checking the exit code of the process isn't helpful here because once the arguments are
                     // validated, songe-converter exits 0 regardless of whether it converted a song.
                     var process = new Process();
                     var startInfo = new ProcessStartInfo
                     {
                         WindowStyle = ProcessWindowStyle.Normal,
-                        FileName = converterPath,
+                        FileName = $"{BeatSaber.InstallPath}\\songe-converter.exe",
                         Arguments = $"-k -a \"{customSongsPath}\"",
                         UseShellExecute = false,
                     };
@@ -121,7 +119,16 @@ namespace Mediocre_Mapper_Pull_BSIPA
 
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
-                    process.Start();
+                    try
+                    {
+                        process.Start();
+                    }
+                    catch (Win32Exception e)
+                    {
+                        _statusText.ShowMessage($"Failed to run songe-converter at\n{process.StartInfo.FileName}\n{new Win32Exception(e.NativeErrorCode).Message}");
+                        Logger.log.Error(e.Message);
+                        yield break;
+                    }
                     Logger.log.Debug("Started conversion.");
 
                     yield return new WaitUntil(() => _conversionDone);
@@ -129,13 +136,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
                     Logger.log.Debug($"Conversion complete in {stopwatch.Elapsed}; refreshing songs.");
                     _statusText.ShowMessage($"Conversion complete; refreshing {folderName}", 3);
                     SongCore.Loader.Instance.RefreshSongs();
-                }
-                else
-                {
-                    var errorMessage = $"{converterPath} does not exist; can't convert";
-                    _statusText.ShowMessage(errorMessage);
-                    Logger.log.Info(errorMessage);
-                }
             }
             finally
             {
