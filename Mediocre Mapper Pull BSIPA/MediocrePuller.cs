@@ -151,7 +151,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
             var message = new StringBuilder();
             var buffer = new byte[4096];
 
-            // TODO: How to display progress? text requires a transform.
             Logger.log.Debug($"Connecting with TCP to {host}:{port}");
             stopwatch.Start();
 
