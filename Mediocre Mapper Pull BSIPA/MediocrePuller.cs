@@ -101,6 +101,8 @@ namespace Mediocre_Mapper_Pull_BSIPA
                 var converterPath = $"{BeatSaber.InstallPath}\\songe-converter.exe";
                 if (File.Exists(converterPath))
                 {
+                    // Checking the exit code of the process isn't helpful here because once the arguments are
+                    // validated, songe-converter exits 0 regardless of whether it converted a song.
                     var process = new Process();
                     var startInfo = new ProcessStartInfo
                     {
@@ -140,7 +142,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
 
         private void Process_Exited(object sender, EventArgs e)
         {
-            // TODO: persist process handle and check exit code?
             _conversionDone = true;
         }
 
