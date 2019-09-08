@@ -19,27 +19,22 @@ namespace Mediocre_Mapper_Pull_BSIPA
 
         public void OnApplicationStart()
         {
-            Logger.log.Debug("OnApplicationStart");
         }
 
         public void OnApplicationQuit()
         {
-            Logger.log.Debug("OnApplicationQuit");
         }
 
         public void OnFixedUpdate()
         {
-
         }
 
         public void OnUpdate()
         {
-
         }
 
         public void OnActiveSceneChanged(Scene prevScene, Scene nextScene)
         {
-
         }
 
         public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
@@ -59,7 +54,6 @@ namespace Mediocre_Mapper_Pull_BSIPA
 
         public void OnSceneUnloaded(Scene scene)
         {
-
         }
     }
 }
