@@ -112,6 +112,7 @@ namespace Mediocre_Mapper_Pull_BSIPA
                     process.StartInfo = startInfo;
                     process.EnableRaisingEvents = true;
                     process.Exited += Process_Exited;
+                    _conversionDone = false;
 
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
