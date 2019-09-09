@@ -93,7 +93,7 @@ namespace Mediocre_Mapper_Pull_BSIPA
             }
         }
 
-        private SongFields ReadWelcomeMessage(string host, int port)
+        private static SongFields ReadWelcomeMessage(string host, int port)
         {
             var stopwatch = new Stopwatch();
             var message = new StringBuilder();
@@ -154,7 +154,7 @@ namespace Mediocre_Mapper_Pull_BSIPA
             return fields;
         }
 
-        private void ConvertSong(SongFields fields)
+        private static void ConvertSong(SongFields fields)
         {
                 var customSongsPath = $"{BeatSaber.InstallPath}\\Beat Saber_Data\\CustomWIPLevels";
                 var songPath = $"{customSongsPath}\\{fields.FolderName}";
