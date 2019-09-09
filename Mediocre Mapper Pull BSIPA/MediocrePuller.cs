@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
+using System.Threading.Tasks;
 using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,11 +19,14 @@ namespace Mediocre_Mapper_Pull_BSIPA
         public static MediocrePuller Instance;
 
         private bool _runningPull;
-        private bool _welcomeDone;
-        private bool _conversionDone;
-
-        private string[] _components;
         private StatusText _statusText;
+
+        private struct SongFields
+        {
+            public string FolderName;
+            public string DifficultyFilename;
+            public string DifficultyContent;
+        }
 
         public static void OnLoad()
         {
@@ -58,84 +61,31 @@ namespace Mediocre_Mapper_Pull_BSIPA
         {
             try
             {
-                _components = null;
-                _welcomeDone = false;
                 _statusText.ShowMessage($"Connecting to {host}:{port}...");
-                new Thread(delegate(object o)
-                {
-                    try
-                    {
-                        _components = ReadWelcomeMessage(host, port);
-                    }
-                    catch (Exception e)
-                    {
-                        _statusText.ShowMessage(e.Message);
-                        Logger.log.Error(e.Message);
-                    }
-                    finally
-                    {
-                        _welcomeDone = true;
-                    }
-                }).Start();
 
-                // If _components is not set, there was a problem.
-                yield return new WaitUntil(() => _welcomeDone);
-                if (_components == null)
+                var readWelcome = Task.Run(() => ReadWelcomeMessage(host, port));
+                yield return new WaitUntil(() => readWelcome.IsCompleted);
+                if (readWelcome.IsFaulted)
                 {
+                    _statusText.ShowMessage(readWelcome.Exception.InnerException.Message);
+                    Logger.log.Error(readWelcome.Exception);
                     yield break;
                 }
 
-                var folderName = _components[0].Split(new[] {"::"}, StringSplitOptions.None)[0];
-                var difficultyFilename = _components[2];
-                var difficultyContent = _components[3];
-                Logger.log.Debug($"Folder: {folderName}\nDifficulty: {difficultyFilename}\nDifficulty size: {difficultyContent.Length} characters");
-                _statusText.ShowMessage($"Got song {folderName}");
+                var songFields = readWelcome.Result;
+                _statusText.ShowMessage($"Got song {songFields.FolderName}");
 
-                var customSongsPath = $"{BeatSaber.InstallPath}\\Beat Saber_Data\\CustomWIPLevels";
-                var songPath = $"{customSongsPath}\\{folderName}";
-                var difficultyPath = $"{songPath}\\{difficultyFilename}";
-
-                Logger.log.Debug($"Writing to {difficultyPath}");
-                using (var outputDifficulty = File.CreateText(difficultyPath))
+                var convertSong = Task.Run(() => ConvertSong(readWelcome.Result));
+                yield return new WaitUntil(() => convertSong.IsCompleted);
+                if (convertSong.IsFaulted)
                 {
-                    outputDifficulty.Write(difficultyContent);
+                    _statusText.ShowMessage(convertSong.Exception.InnerException.Message);
+                    Logger.log.Error(convertSong.Exception);
+                    yield break;
                 }
-                Logger.log.Debug("Wrote file");
 
-                    // Checking the exit code of the process isn't helpful here because once the arguments are
-                    // validated, songe-converter exits 0 regardless of whether it converted a song.
-                    var process = new Process();
-                    var startInfo = new ProcessStartInfo
-                    {
-                        WindowStyle = ProcessWindowStyle.Normal,
-                        FileName = $"{BeatSaber.InstallPath}\\songe-converter.exe",
-                        Arguments = $"-k -a \"{customSongsPath}\"",
-                        UseShellExecute = false,
-                    };
-                    process.StartInfo = startInfo;
-                    process.EnableRaisingEvents = true;
-                    process.Exited += Process_Exited;
-                    _conversionDone = false;
-
-                    var stopwatch = new Stopwatch();
-                    stopwatch.Start();
-                    try
-                    {
-                        process.Start();
-                    }
-                    catch (Win32Exception e)
-                    {
-                        _statusText.ShowMessage($"Failed to run songe-converter at\n{process.StartInfo.FileName}\n{new Win32Exception(e.NativeErrorCode).Message}");
-                        Logger.log.Error(e.Message);
-                        yield break;
-                    }
-                    Logger.log.Debug("Started conversion.");
-
-                    yield return new WaitUntil(() => _conversionDone);
-
-                    Logger.log.Debug($"Conversion complete in {stopwatch.Elapsed}; refreshing songs.");
-                    _statusText.ShowMessage($"Conversion complete; refreshing {folderName}", 3);
-                    SongCore.Loader.Instance.RefreshSongs();
+                _statusText.ShowMessage($"Conversion complete; refreshing {songFields.FolderName}", 3);
+                SongCore.Loader.Instance.RefreshSongs();
             }
             finally
             {
@@ -143,12 +93,7 @@ namespace Mediocre_Mapper_Pull_BSIPA
             }
         }
 
-        private void Process_Exited(object sender, EventArgs e)
-        {
-            _conversionDone = true;
-        }
-
-        private string[] ReadWelcomeMessage(string host, int port)
+        private SongFields ReadWelcomeMessage(string host, int port)
         {
             var stopwatch = new Stopwatch();
             var message = new StringBuilder();
@@ -196,7 +141,59 @@ namespace Mediocre_Mapper_Pull_BSIPA
 
             Logger.log.Debug($"Read welcome message in {stopwatch.Elapsed} seconds");
 
-            return message.ToString().Split(new[] {";;;"}, StringSplitOptions.None);
+            var components = message.ToString().Split(new[] {";;;"}, StringSplitOptions.None);
+            var fields = new SongFields
+            {
+                FolderName = components[0].Split(new[] {"::"}, StringSplitOptions.None)[0],
+                DifficultyFilename = components[2],
+                DifficultyContent = components[3],
+            };
+
+            Logger.log.Debug($"Difficulty size: {fields.DifficultyContent.Length} characters");
+
+            return fields;
+        }
+
+        private void ConvertSong(SongFields fields)
+        {
+                var customSongsPath = $"{BeatSaber.InstallPath}\\Beat Saber_Data\\CustomWIPLevels";
+                var songPath = $"{customSongsPath}\\{fields.FolderName}";
+                var difficultyPath = $"{songPath}\\{fields.DifficultyFilename}";
+
+                Logger.log.Debug($"Writing to {difficultyPath}");
+                using (var outputDifficulty = File.CreateText(difficultyPath))
+                {
+                    outputDifficulty.Write(fields.DifficultyContent);
+                }
+                Logger.log.Debug("Wrote file");
+
+                // Checking the exit code of the process isn't helpful here because once the arguments are
+                // validated, songe-converter exits 0 regardless of whether it converted a song.
+                var process = new Process();
+                var startInfo = new ProcessStartInfo
+                {
+                    WindowStyle = ProcessWindowStyle.Normal,
+                    FileName = $"{BeatSaber.InstallPath}\\songe-converter.exe",
+                    Arguments = $"-k -a \"{customSongsPath}\"",
+                    UseShellExecute = false,
+                };
+                process.StartInfo = startInfo;
+                process.EnableRaisingEvents = true;
+
+                Logger.log.Debug("Starting conversion.");
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+                try
+                {
+                    process.Start();
+                }
+                catch (Win32Exception e)
+                {
+                    throw new Exception($"Failed to run songe-converter at\n{process.StartInfo.FileName}\n{new Win32Exception(e.NativeErrorCode).Message}", e);
+                }
+
+                process.WaitForExit();
+                Logger.log.Debug($"Conversion complete in {stopwatch.Elapsed}; refreshing songs.");
         }
     }
 }
