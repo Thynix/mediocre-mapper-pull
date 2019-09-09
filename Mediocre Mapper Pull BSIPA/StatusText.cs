@@ -11,14 +11,12 @@ namespace Mediocre_Mapper_Pull_BSIPA
         private Canvas _canvas;
         private TMP_Text _statusText;
 
-        private static readonly Vector3 Position = new Vector3(0, 0.3f, 2.5f);
+        private static readonly Vector3 Position = new Vector3(0, 0.1f, 2.5f);
         private static readonly Vector3 Rotation = new Vector3(0, 0, 0);
         private static readonly Vector3 Scale = new Vector3(0.01f, 0.01f, 0.01f);
 
-        private static readonly Vector2 CanvasSize = new Vector2(100, 50);
-
-        private static readonly Vector2 HeaderPosition = new Vector2(10, 15);
-        private static readonly Vector2 HeaderSize = new Vector2(100, 20);
+        private static readonly Vector2 CanvasSize = new Vector2(325, 100);
+        private static readonly Vector2 TextPosition = new Vector2(0, 0);
         private const float HeaderFontSize = 15f;
 
         public static StatusText Create()
@@ -79,13 +77,27 @@ namespace Mediocre_Mapper_Pull_BSIPA
             var rectTransform = _canvas.transform as RectTransform;
             rectTransform.sizeDelta = CanvasSize;
 
-            _statusText = Utils.CreateText(_canvas.transform as RectTransform, "", HeaderPosition);
+            _statusText = Utils.CreateText(_canvas.transform as RectTransform, "", TextPosition);
             rectTransform = _statusText.transform as RectTransform;
             rectTransform.SetParent(_canvas.transform, false);
-            rectTransform.anchoredPosition = HeaderPosition;
-            rectTransform.sizeDelta = HeaderSize;
+            rectTransform.anchoredPosition = TextPosition;
+            rectTransform.sizeDelta = CanvasSize;
             _statusText.fontSize = HeaderFontSize;
-            _statusText.alignment = TextAlignmentOptions.Center;
+            _statusText.alignment = TextAlignmentOptions.Top;
+            _statusText.enableWordWrapping = true;
+
+#if false
+            var canvasBackground = new GameObject("canvas background").AddComponent<Image>();
+            rectTransform = canvasBackground.transform as RectTransform;
+            rectTransform.SetParent(_canvas.transform, false);
+            rectTransform.sizeDelta = CanvasSize;
+            var tex = Texture2D.whiteTexture;
+            var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.one * 0.5f, 100, 1);
+            canvasBackground.sprite = sprite;
+            canvasBackground.type = Image.Type.Filled;
+            canvasBackground.fillMethod = Image.FillMethod.Horizontal;
+            canvasBackground.color = new Color(0.5f, 0.5f, 0.5f, 0.0f);
+#endif
 
             DontDestroyOnLoad(gameObject);
         }
